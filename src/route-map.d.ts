@@ -38,6 +38,34 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/admin/users': RouteRecordInfo<
+      '/admin/users',
+      '/admin/users',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/auth/callback': RouteRecordInfo<
+      '/auth/callback',
+      '/auth/callback',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/authorize': RouteRecordInfo<
+      '/authorize',
+      '/authorize',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/calendar': RouteRecordInfo<
+      '/calendar',
+      '/calendar',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/customers': RouteRecordInfo<
       '/customers',
       '/customers',
@@ -48,6 +76,13 @@ declare module 'vue-router/auto-routes' {
     '/inbox': RouteRecordInfo<
       '/inbox',
       '/inbox',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/notes': RouteRecordInfo<
+      '/notes',
+      '/notes',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -111,6 +146,38 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
+    'src/pages/admin/users.vue': {
+      routes:
+        | '/admin/users'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/auth/callback.vue': {
+      routes:
+        | '/auth/callback'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/authorize.vue': {
+      routes:
+        | '/authorize'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/calendar.vue': {
+      routes:
+        | '/calendar'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
     'src/pages/customers.vue': {
       routes:
         | '/customers'
@@ -122,6 +189,14 @@ declare module 'vue-router/auto-routes' {
     'src/pages/inbox.vue': {
       routes:
         | '/inbox'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/notes.vue': {
+      routes:
+        | '/notes'
       views:
         | never
       pathParamNames:

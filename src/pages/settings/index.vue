@@ -1,50 +1,35 @@
 <script setup lang="ts">
 import * as z from 'zod'
-import { reactive, ref } from 'vue'
+import { reactive } from 'vue'
 import type { FormSubmitEvent } from '@nuxt/ui'
+import { updateProfile } from '../../modules/account/api'
+import { useAuth } from '../../modules/auth/useAuth'
+import { useNotify } from '../../modules/core/useNotify'
 
-const fileRef = ref<HTMLInputElement>()
+const auth = useAuth()
+const notify = useNotify()
 
 const profileSchema = z.object({
-  name: z.string().min(2, 'Too short'),
-  email: z.string().email('Invalid email'),
-  username: z.string().min(2, 'Too short'),
-  avatar: z.string().optional(),
-  bio: z.string().optional()
+  name: z.string().trim().min(2, 'Too short').max(80),
+  email: z.email('Invalid email'),
+  dailyGoal: z.number().int().min(500, 'At least 500 kcal').max(10000, 'At most 10 000 kcal')
 })
 
 type ProfileSchema = z.output<typeof profileSchema>
 
-const profile = reactive<Partial<ProfileSchema>>({
-  name: 'Benjamin Canac',
-  email: 'ben@nuxtlabs.com',
-  username: 'benjamincanac',
-  avatar: undefined,
-  bio: undefined
+const profile = reactive<ProfileSchema>({
+  name: auth.user.value?.name ?? '',
+  email: auth.user.value?.email ?? '',
+  dailyGoal: auth.user.value?.dailyGoal ?? 2000
 })
-const toast = useToast()
+
 async function onSubmit(event: FormSubmitEvent<ProfileSchema>) {
-  toast.add({
-    title: 'Success',
-    description: 'Your settings have been updated.',
-    icon: 'i-lucide-check',
-    color: 'success'
-  })
-  console.log(event.data)
-}
-
-function onFileChange(e: Event) {
-  const input = e.target as HTMLInputElement
-
-  if (!input.files?.length) {
-    return
+  try {
+    auth.setUser(await updateProfile(event.data))
+    notify.success('Settings saved')
+  } catch (error) {
+    notify.error(error, 'Could not save settings')
   }
-
-  profile.avatar = URL.createObjectURL(input.files[0])
-}
-
-function onFileClick() {
-  fileRef.value?.click()
 }
 </script>
 
@@ -57,7 +42,7 @@ function onFileClick() {
   >
     <UPageCard
       title="Profile"
-      description="These informations will be displayed publicly."
+      description="Your account details and nutrition target."
       variant="naked"
       orientation="horizontal"
       class="mb-4"
@@ -67,6 +52,7 @@ function onFileClick() {
         label="Save changes"
         color="neutral"
         type="submit"
+        loading-auto
         class="w-fit lg:ms-auto"
       />
     </UPageCard>
@@ -75,83 +61,35 @@ function onFileClick() {
       <UFormField
         name="name"
         label="Name"
-        description="Will appear on receipts, invoices, and other communication."
         required
         class="flex max-sm:flex-col justify-between items-start gap-4"
       >
-        <UInput
-          v-model="profile.name"
-          autocomplete="off"
-        />
+        <UInput v-model="profile.name" autocomplete="name" />
       </UFormField>
       <USeparator />
       <UFormField
         name="email"
         label="Email"
-        description="Used to sign in, for email receipts and product updates."
+        description="Used to sign in."
         required
         class="flex max-sm:flex-col justify-between items-start gap-4"
       >
-        <UInput
-          v-model="profile.email"
-          type="email"
-          autocomplete="off"
-        />
+        <UInput v-model="profile.email" type="email" autocomplete="email" />
       </UFormField>
       <USeparator />
       <UFormField
-        name="username"
-        label="Username"
-        description="Your unique username for logging in and your profile URL."
-        required
+        name="dailyGoal"
+        label="Daily calorie goal"
+        description="Used for the diary progress bar and calendar colours."
         class="flex max-sm:flex-col justify-between items-start gap-4"
       >
-        <UInput
-          v-model="profile.username"
-          type="username"
-          autocomplete="off"
-        />
-      </UFormField>
-      <USeparator />
-      <UFormField
-        name="avatar"
-        label="Avatar"
-        description="JPG, GIF or PNG. 1MB Max."
-        class="flex max-sm:flex-col justify-between sm:items-center gap-4"
-      >
-        <div class="flex flex-wrap items-center gap-3">
-          <UAvatar
-            :src="profile.avatar"
-            :alt="profile.name"
-            size="lg"
-          />
-          <UButton
-            label="Choose"
-            color="neutral"
-            @click="onFileClick"
-          />
-          <input
-            ref="fileRef"
-            type="file"
-            class="hidden"
-            accept=".jpg, .jpeg, .png, .gif"
-            @change="onFileChange"
-          >
-        </div>
-      </UFormField>
-      <USeparator />
-      <UFormField
-        name="bio"
-        label="Bio"
-        description="Brief description for your profile. URLs are hyperlinked."
-        class="flex max-sm:flex-col justify-between items-start gap-4"
-        :ui="{ container: 'w-full' }"
-      >
-        <UTextarea
-          v-model="profile.bio"
-          :rows="5"
-          autoresize
-          class="w-full"
+        <UInputNumber
+          v-model="profile.dailyGoal"
+          :min="500"
+          :max="10000"
+          :step="50"
+          :step-snapping="false"
+          :format-options="{ style: 'unit', unit: 'kilocalorie' }"
         />
       </UFormField>
     </UPageCard>

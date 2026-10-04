@@ -9,6 +9,7 @@ import { createHead } from '@unhead/vue/client'
 import ui from '@nuxt/ui/vue-plugin'
 
 import App from './App.vue'
+import { installAuthGuard } from './modules/auth/guard'
 
 const app = createApp(App)
 
@@ -17,6 +18,8 @@ const router = createRouter({
   routes: setupLayouts(routes as RouteRecordRaw[]),
   history: createWebHistory()
 })
+
+installAuthGuard(router)
 
 app.use(head)
 app.use(router)

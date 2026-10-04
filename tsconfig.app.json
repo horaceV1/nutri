@@ -29,7 +29,7 @@
       "vite-plugin-vue-layouts/client"
     ]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "auto-imports.d.ts", "components.d.ts"],
+  "include": ["src/**/*.ts", "shared/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "auto-imports.d.ts", "components.d.ts"],
   "vueCompilerOptions": {
     "plugins": [
       "vue-router/volar/sfc-typed-router",

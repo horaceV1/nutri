@@ -8,15 +8,15 @@ const appUrl = (process.env.APP_URL ?? 'http://localhost:5173').replace(/\/$/, '
 
 export const config = {
   port: Number(process.env.API_PORT ?? 3001),
-  production: process.env.NODE_ENV === 'production',
+  production: process.env.NODE_ENV === 'production' || process.argv.includes('--production'),
   appUrl,
   dbFile: process.env.DB_FILE ?? 'server/data/nutri.db',
   fdcApiKey: process.env.FDC_API_KEY ?? '',
-  jwtSecret: process.env.JWT_SECRET,
+  jwtSecret: process.env.JWT_SECRET || undefined,
   admin: {
     email: process.env.ADMIN_EMAIL ?? 'admin@nutri.local',
     name: process.env.ADMIN_NAME ?? 'Administrator',
-    password: process.env.ADMIN_PASSWORD
+    password: process.env.ADMIN_PASSWORD || undefined
   },
   oauth: {
     issuer: appUrl,

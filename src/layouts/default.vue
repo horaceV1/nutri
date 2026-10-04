@@ -1,116 +1,88 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { useStorage } from '@vueuse/core'
+import { useRouter } from 'vue-router'
 import type { NavigationMenuItem } from '@nuxt/ui'
+import { useAuth } from '../modules/auth/useAuth'
+import AppLogo from '../modules/core/components/AppLogo.vue'
 
-const toast = useToast()
-const route = useRoute()
+const router = useRouter()
+const { isAdmin } = useAuth()
 
 const open = ref(false)
+const close = () => {
+  open.value = false
+}
 
-const links = [[{
-  label: 'Home',
-  icon: 'i-lucide-house',
-  to: '/',
-  onSelect: () => {
-    open.value = false
-  }
-}, {
-  label: 'Inbox',
-  icon: 'i-lucide-inbox',
-  to: '/inbox',
-  badge: '4',
-  onSelect: () => {
-    open.value = false
-  }
-}, {
-  label: 'Customers',
-  icon: 'i-lucide-users',
-  to: '/customers',
-  onSelect: () => {
-    open.value = false
-  }
-}, {
-  label: 'Settings',
-  to: '/settings',
-  icon: 'i-lucide-settings',
-  defaultOpen: true,
-  type: 'trigger',
-  children: [{
-    label: 'General',
-    to: '/settings',
-    exact: true,
-    onSelect: () => {
-      open.value = false
-    }
+const links = computed(() => {
+  const main: NavigationMenuItem[] = [{
+    label: 'Diary',
+    icon: 'i-lucide-notebook-pen',
+    to: '/',
+    onSelect: close
   }, {
-    label: 'Members',
-    to: '/settings/members',
-    onSelect: () => {
-      open.value = false
-    }
+    label: 'Calendar',
+    icon: 'i-lucide-calendar-days',
+    to: '/calendar',
+    onSelect: close
   }, {
-    label: 'Notifications',
-    to: '/settings/notifications',
-    onSelect: () => {
-      open.value = false
-    }
-  }, {
-    label: 'Security',
-    to: '/settings/security',
-    onSelect: () => {
-      open.value = false
-    }
+    label: 'Notes',
+    icon: 'i-lucide-sticky-note',
+    to: '/notes',
+    onSelect: close
   }]
-}], [{
-  label: 'Feedback',
-  icon: 'i-lucide-message-circle',
-  to: 'https://github.com/nuxt-ui-templates/dashboard-vue',
-  target: '_blank'
-}, {
-  label: 'Help & Support',
-  icon: 'i-lucide-info',
-  to: 'https://github.com/nuxt/ui',
-  target: '_blank'
-}]] satisfies NavigationMenuItem[][]
+
+  if (isAdmin.value) {
+    main.push({
+      label: 'Users',
+      icon: 'i-lucide-users',
+      to: '/admin/users',
+      badge: 'Admin',
+      onSelect: close
+    })
+  }
+
+  main.push({
+    label: 'Settings',
+    to: '/settings',
+    icon: 'i-lucide-settings',
+    defaultOpen: true,
+    type: 'trigger',
+    children: [{
+      label: 'General',
+      to: '/settings',
+      exact: true,
+      onSelect: close
+    }, {
+      label: 'Security',
+      to: '/settings/security',
+      onSelect: close
+    }]
+  })
+
+  const secondary: NavigationMenuItem[] = [{
+    label: 'Food data: USDA FoodData Central',
+    icon: 'i-lucide-database',
+    to: 'https://fdc.nal.usda.gov/',
+    target: '_blank'
+  }]
+
+  return [main, secondary]
+})
 
 const groups = computed(() => [{
   id: 'links',
   label: 'Go to',
-  items: links.flat()
-}, {
-  id: 'code',
-  label: 'Code',
-  items: [{
-    id: 'source',
-    label: 'View page source',
-    icon: 'simple-icons:github',
-    to: `https://github.com/nuxt-ui-templates/dashboard-vue/blob/main/src/pages${route.path === '/' ? '/index' : route.path}.vue`,
-    target: '_blank'
-  }]
+  items: links.value[0]!
+    .flatMap(link => link.children?.map(child => ({ ...child, icon: link.icon })) ?? [link])
+    .map(({ label, icon, to }) => ({ id: String(to), label, icon, to }))
 }])
 
-const cookie = useStorage('cookie-consent', 'pending')
-if (cookie.value !== 'accepted') {
-  toast.add({
-    title: 'We use first-party cookies to enhance your experience on our website.',
-    duration: 0,
-    close: false,
-    actions: [{
-      label: 'Accept',
-      color: 'neutral',
-      variant: 'outline',
-      onClick: () => {
-        cookie.value = 'accepted'
-      }
-    }, {
-      label: 'Opt out',
-      color: 'neutral',
-      variant: 'ghost'
-    }]
-  })
-}
+defineShortcuts({
+  'g-d': () => router.push('/'),
+  'g-c': () => router.push('/calendar'),
+  'g-n': () => router.push('/notes'),
+  'g-s': () => router.push('/settings')
+})
 </script>
 
 <template>
@@ -124,7 +96,7 @@ if (cookie.value !== 'accepted') {
       :ui="{ footer: 'lg:border-t lg:border-default' }"
     >
       <template #header="{ collapsed }">
-        <TeamsMenu :collapsed="collapsed" />
+        <AppLogo :collapsed="collapsed" />
       </template>
 
       <template #default="{ collapsed }">
@@ -155,7 +127,5 @@ if (cookie.value !== 'accepted') {
     <UDashboardSearch :groups="groups" />
 
     <RouterView />
-
-    <NotificationsSlideover />
   </UDashboardGroup>
 </template>
